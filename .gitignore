@@ -1,0 +1,33 @@
+node_modules/
+.env
+.env.local
+.env.*.local
+*.log
+npm-debug.log*
+.DS_Store
+.idea/
+.vscode/
+dist/
+build/
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+tfplan
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+
+
+
+
+#documentation of steps 
+documentation.txt
+.env

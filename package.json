@@ -1,0 +1,19 @@
+{
+  "name": "tarantula_app",
+  "version": "1.0.0",
+  "description": "Simple user registration app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["app", "postgres", "express"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "pg": "^8.10.0",
+    "dotenv": "^16.3.1"
+  }
+}
