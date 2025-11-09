@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarantula App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+            font-weight: bold;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .users-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+
+        .users-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .user-item {
+            background: #f9f9f9;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            border-radius: 3px;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .user-location {
+            color: #666;
+            font-size: 14px;
+            margin-top: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🕷️ Tarantula App</h1>
+
+        <form id="userForm">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" placeholder="Enter your name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" placeholder="Enter your location" required>
+            </div>
+
+            <button type="submit">Submit</button>
+        </form>
+
+        <div id="message" class="message"></div>
+
+        <div class="users-section">
+            <h2>Users</h2>
+            <div id="userList"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+        const form = document.getElementById('userForm');
+        const nameInput = document.getElementById('name');
+        const locationInput = document.getElementById('location');
+        const messageDiv = document.getElementById('message');
+        const userListDiv = document.getElementById('userList');
+
+        // Form Submit
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = nameInput.value.trim();
+            const location = locationInput.value.trim();
+
+            if (!name || !location) {
+                showMessage('Please fill all fields', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, location })
+                });
+
+                if (!response.ok) throw new Error('Failed');
+
+                showMessage('✓ User added successfully!', 'success');
+                nameInput.value = '';
+                locationInput.value = '';
+                setTimeout(loadUsers, 500);
+            } catch (err) {
+                showMessage('✗ Error: ' + err.message, 'error');
+            }
+        });
+
+        // Load Users
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_URL}/api/users`);
+                const users = await response.json();
+
+                if (users.length === 0) {
+                    userListDiv.innerHTML = '<p style="color: #999; text-align: center;">No users yet</p>';
+                } else {
+                    userListDiv.innerHTML = users.map(user => `
+                        <div class="user-item">
+                            <div class="user-name">${escapeHtml(user.name)}</div>
+                            <div class="user-location">📍 ${escapeHtml(user.location)}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+            }
+        }
+
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Load on start
+        loadUsers();
+        setInterval(loadUsers, 5000);
+    </script>
+</body>
+</html>

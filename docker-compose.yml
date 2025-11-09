@@ -1,0 +1,56 @@
+services: 
+  #postgreSQL database container 
+  postgres: 
+    image: postgres:13-alpine
+    container_name: tarantula_postgres
+    environment: 
+      POSTGRES_USER: admin 
+      POSTGRES_PASSWORD: Tarantula@123
+      POSTGRES_DB: tarantuladb
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes: 
+      - postgres_data:/var/lib/postgresql/data
+    ports: 
+      - "5432:5432" 
+    networks: 
+      - tarantula_network
+    healthcheck: 
+      test: ["CMD-SHELL", "pg_isready -U admin -d tarantuladb"] 
+      interval: 10s 
+      timeout: 5s 
+      retries: 5
+
+  #node.js application container 
+  app: 
+    build: . 
+    container_name: tarantula_app
+    environment: 
+      DB_HOST: postgres
+      DB_USER: admin
+      DB_PASSWORD: Tarantula@123
+      DB_NAME: tarantuladb
+      DB_PORT: 5432
+      PORT: 3000
+    ports: 
+      - "80:3000" 
+      - "3000:3000" 
+    depends_on: 
+      postgres: 
+        condition: service_healthy 
+    
+    networks: 
+      - tarantula_network
+    restart: on-failure
+#    healthcheck: 
+#      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+#      interval: 30s 
+#      timeout: 3s 
+#      retries: 3
+
+
+volumes: 
+  postgres_data: 
+
+networks: 
+  tarantula_network:
+    driver: bridge
