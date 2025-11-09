@@ -31,3 +31,5 @@ Thumbs.db
 #documentation of steps 
 documentation.txt
 .env
+
+jenkinsfile
